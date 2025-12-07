@@ -26,20 +26,6 @@ if (isset($_POST['shipping_api'])) {
     exit;
 }
 
-// SSRF Vuln #10: Order webhook (simple POST)
-if (isset($_POST['order_webhook'])) {
-    $webhook_url = $_POST['order_webhook'];
-    $options = [
-        'http' => [
-            'method' => 'POST',
-            'content' => 'order=success'
-        ]
-    ];
-    $context = stream_context_create($options);
-    file_get_contents($webhook_url, false, $context);
-    exit;
-}
-
 // Xử lý thanh toán
 $orderSuccess = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SESSION['cart'])) {
@@ -123,7 +109,6 @@ include 'includes/header.php';
                     
                     <!-- Hidden SSRF test parameters for fuzzing -->
                     <input type="hidden" name="shipping_api" value="">
-                    <input type="hidden" name="order_webhook" value="">
                     
                     <h3>Phương thức thanh toán</h3>
                     <div class="payment-methods">

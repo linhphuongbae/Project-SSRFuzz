@@ -16,18 +16,6 @@ if (isset($_POST['verify_captcha'])) {
     exit;
 }
 
-// SSRF Vuln #7: Webhook (simple curl POST)
-if (isset($_POST['webhook'])) {
-    $webhook_url = $_POST['webhook'];
-    $ch = curl_init($webhook_url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, 'data=test');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_exec($ch);
-    curl_close($ch);
-    exit;
-}
-
 include 'includes/header.php';
 
 $messageSent = false;
@@ -161,7 +149,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
                     <!-- Hidden SSRF test parameters for fuzzing -->
                     <input type="hidden" name="attachment_url" value="">
                     <input type="hidden" name="verify_captcha" value="">
-                    <input type="hidden" name="webhook" value="">
                     
                     <button type="submit" class="main-btn btn-send"><i class="fas fa-paper-plane"></i> Gửi tin nhắn</button>
                 </form>

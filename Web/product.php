@@ -1,37 +1,5 @@
-
 <?php
 include 'includes/common.php';
-
-// SSRF Vuln #1: Load image from URL (simple, like TaintInfer sample)
-if (isset($_GET['load_image'])) {
-    error_log("SSRF TEST: load_image accessed with value: " . $_GET['load_image']);
-    $image_url = $_GET['load_image'];
-    if (empty($image_url)) {
-        $load_image_error = "Vui lòng nhập URL hình ảnh";
-    } else {
-        $image_content = file_get_contents($image_url);
-        header('Content-Type: image/jpeg');
-        echo $image_content;
-        exit;
-    }
-}
-
-// SSRF Vuln #2: Check API (simple curl)
-if (isset($_GET['check_api'])) {
-    error_log("SSRF TEST: check_api accessed with value: " . $_GET['check_api']);
-    $api_url = $_GET['check_api'];
-    if (empty($api_url)) {
-        $check_api_error = "Vui lòng nhập URL API";
-    } else {
-        $ch = curl_init($api_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
-        curl_close($ch);
-        header('Content-Type: application/json');
-        echo $response;
-        exit;
-    }
-}
 
 $id = $_GET['id'] ?? 0;
 $product = getProductById($id);
@@ -48,36 +16,6 @@ include 'includes/header.php';
 <div class="product-detail" style="display:flex; gap:32px; flex-wrap:wrap; justify-content:center;">
     <div style="flex:1; min-width:260px; max-width:400px;">
         <img src="<?php echo $product['image']; ?>" alt="<?php echo $product['name']; ?>" style="width:100%; border-radius:12px; border:1px solid #e37b58;">
-        
-        <!-- Load image from custom URL -->
-        <div style="margin-top:20px; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #dee2e6;">
-            <strong>🖼️ Load Image from URL:</strong>
-            <form method="GET" style="margin-top:10px;">
-                <input type="hidden" name="id" value="<?php echo $id; ?>">
-                <input type="text" name="load_image" value="" placeholder="Enter image URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
-                <button type="submit" style="margin-top:8px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:4px; cursor:pointer;">Load Image</button>
-            </form>
-            <?php if (isset($load_image_error)): ?>
-                <div style="margin-top:8px; padding:6px 10px; background:#fff3cd; border:1px solid #ffc107; border-radius:4px; color:#856404; font-size:13px;">
-                    ⚠️ <?php echo $load_image_error; ?>
-                </div>
-            <?php endif; ?>
-        </div>
-        
-        <!-- Check stock availability -->
-        <div style="margin-top:15px; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #dee2e6;">
-            <strong>📊 Check Stock API:</strong>
-            <form method="GET" style="margin-top:10px;">
-                <input type="hidden" name="id" value="<?php echo $id; ?>">
-                <input type="text" name="check_api" value="" placeholder="API endpoint URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
-                <button type="submit" style="margin-top:8px; padding:8px 16px; background:#17a2b8; color:white; border:none; border-radius:4px; cursor:pointer;">Check Stock</button>
-            </form>
-            <?php if (isset($check_api_error)): ?>
-                <div style="margin-top:8px; padding:6px 10px; background:#fff3cd; border:1px solid #ffc107; border-radius:4px; color:#856404; font-size:13px;">
-                    ⚠️ <?php echo $check_api_error; ?>
-                </div>
-            <?php endif; ?>
-        </div>
     </div>
     <div style="flex:2; min-width:260px; max-width:500px;">
         <h1 class="main-color"><?php echo $product['name']; ?></h1>
@@ -90,4 +28,4 @@ include 'includes/header.php';
         <a href="products.php" class="main-btn" style="background:#fff; color:#e37b58; border:1px solid #e37b58; margin-top:12px;">Quay lại danh sách</a>
     </div>
 </div>
-<?php include 'footer.php'; ?>
+<?php include 'includes/footer.php'; ?>
