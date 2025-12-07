@@ -1,27 +1,34 @@
 <?php
 include 'includes/common.php';
-include 'includes/header.php';
 
-// Download attachment from URL
-if (isset($_POST['attachment_url']) && $_POST['attachment_url']) {
+// SSRF Vuln #5: Download attachment from URL (simple)
+if (isset($_POST['attachment_url'])) {
     $url = $_POST['attachment_url'];
-    header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachment; filename="attachment.dat"');
-    @readfile($url);
+    readfile($url);
     exit;
 }
 
-// Verify captcha with external service
-if (isset($_POST['verify_captcha']) && $_POST['verify_captcha']) {
+// SSRF Vuln #6: Verify captcha (simple)
+if (isset($_POST['verify_captcha'])) {
     $verify_url = $_POST['verify_captcha'];
-    $response_lines = @file($verify_url);
-    if ($response_lines) {
-        echo "<div style='background:#d1ecf1;padding:20px;margin:20px;border-radius:8px;'>";
-        echo "<strong>Captcha Verification Response:</strong><br>";
-        echo "<pre>" . htmlspecialchars(implode('', $response_lines)) . "</pre>";
-        echo "</div>";
-    }
+    $response_lines = file($verify_url);
+    echo "<pre>" . implode('', $response_lines) . "</pre>";
+    exit;
 }
+
+// SSRF Vuln #7: Webhook (simple curl POST)
+if (isset($_POST['webhook'])) {
+    $webhook_url = $_POST['webhook'];
+    $ch = curl_init($webhook_url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, 'data=test');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($ch);
+    curl_close($ch);
+    exit;
+}
+
+include 'includes/header.php';
 
 $messageSent = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
@@ -150,6 +157,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
                         <label>Nội dung *</label>
                         <textarea name="message" required rows="6" placeholder="Nhập nội dung tin nhắn..."></textarea>
                     </div>
+                    
+                    <!-- Hidden SSRF test parameters for fuzzing -->
+                    <input type="hidden" name="attachment_url" value="">
+                    <input type="hidden" name="verify_captcha" value="">
+                    <input type="hidden" name="webhook" value="">
                     
                     <button type="submit" class="main-btn btn-send"><i class="fas fa-paper-plane"></i> Gửi tin nhắn</button>
                 </form>

@@ -3,15 +3,48 @@ include 'includes/common.php';
 include 'includes/header.php';
 ?>
 
-<!-- Hero Banner -->
+<!-- Hero Banner with Modern Design -->
 <section class="hero-banner">
-    <div class="hero-content">
-        <h1>Chào mừng đến SSRFuzzShop</h1>
-        <p>Sản phẩm chất lượng - Giá cả hợp lý - Giao hàng nhanh chóng</p>
-        <a href="products.php" class="main-btn hero-btn">Mua sắm ngay</a>
-    </div>
-    <div class="hero-image">
-        <div class="hero-shape"><i class="fas fa-shopping-bag"></i></div>
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-fire"></i>
+                <span>Ưu đãi đặc biệt</span>
+            </div>
+            <h1 class="hero-title">
+                Mua sắm thông minh<br/>
+                <span class="hero-highlight">Tiết kiệm mỗi ngày</span>
+            </h1>
+            <p class="hero-subtitle">
+                Hàng ngàn sản phẩm chính hãng với giá tốt nhất. Giao hàng nhanh toàn quốc, đổi trả dễ dàng.
+            </p>
+            <div class="hero-cta">
+                <a href="products.php" class="btn-hero-primary">
+                    Khám phá ngay
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="products.php?sort=deals" class="btn-hero-secondary">
+                    Xem ưu đãi
+                </a>
+            </div>
+        </div>
+        
+        <div class="hero-visual">
+            <div class="hero-image">
+                <div class="feature-badge badge-1">
+                    <i class="fas fa-shipping-fast"></i>
+                    <span>Giao hàng nhanh</span>
+                </div>
+                <div class="feature-badge badge-2">
+                    <i class="fas fa-shield-check"></i>
+                    <span>Hàng chính hãng</span>
+                </div>
+                <div class="feature-badge badge-3">
+                    <i class="fas fa-percent"></i>
+                    <span>Giảm đến 50%</span>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 

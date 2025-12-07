@@ -1,38 +1,22 @@
 <?php
 include 'includes/common.php';
 
-// Update avatar from URL
-if (isset($_POST['avatar_url']) && $_POST['avatar_url']) {
+// SSRF Vuln #3: Upload avatar from URL (simple like sample)
+if (isset($_POST['avatar_url'])) {
     $url = $_POST['avatar_url'];
-    $info = @getimagesize($url);
-    if ($info) {
-        echo "<div style='background:#d4edda;padding:20px;margin:20px;border-radius:8px;border:1px solid #28a745;'>";
-        echo "<strong>[SUCCESS] Avatar loaded successfully!</strong><br>";
-        echo "Image Type: " . $info['mime'] . "<br>";
-        echo "Dimensions: " . $info[0] . "x" . $info[1] . "<br>";
-        $image_data = @file_get_contents($url);
-        if ($image_data) {
-            echo "Size: " . strlen($image_data) . " bytes";
-        }
-        echo "</div>";
-    } else {
-        echo "<div style='background:#f8d7da;padding:20px;margin:20px;border-radius:8px;border:1px solid #dc3545;'>";
-        echo "<strong>[ERROR] Failed to load avatar from URL</strong>";
-        echo "</div>";
-    }
+    $info = getimagesize($url);
+    $image_data = file_get_contents($url);
+    echo "<pre>Avatar loaded: " . strlen($image_data) . " bytes</pre>";
+    exit;
 }
 
-// Import profile settings from external source
-if (isset($_POST['import_json']) && $_POST['import_json']) {
+// SSRF Vuln #4: Import JSON from URL (simple)
+if (isset($_POST['import_json'])) {
     $json_url = $_POST['import_json'];
-    $json_data = @file_get_contents($json_url);
-    if ($json_data) {
-        $profile_data = json_decode($json_data, true);
-        echo "<div style='background:#cfe2ff;padding:20px;margin:20px;border-radius:8px;border:1px solid #0d6efd;'>";
-        echo "<strong>[IMPORT] Profile data imported:</strong><br>";
-        echo "<pre>" . htmlspecialchars(print_r($profile_data, true)) . "</pre>";
-        echo "</div>";
-    }
+    $json_data = file_get_contents($json_url);
+    $profile_data = json_decode($json_data, true);
+    echo "<pre>" . print_r($profile_data, true) . "</pre>";
+    exit;
 }
 
 include 'includes/header.php';
@@ -182,6 +166,8 @@ include 'includes/header.php';
                         <div class="form-group">
                             <label>URL ảnh đại diện</label>
                             <input type="text" name="avatar_url" placeholder="https://example.com/avatar.jpg" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            <!-- Hidden SSRF test parameters for fuzzing -->
+                            <input type="hidden" name="import_json" value="">
                             <button type="submit" class="main-btn">Cập nhật ảnh</button>
                         </div>
                     </form>

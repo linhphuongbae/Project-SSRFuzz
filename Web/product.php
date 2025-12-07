@@ -1,38 +1,39 @@
 
 <?php
 include 'includes/common.php';
-$id = $_GET['id'] ?? 0;
-$product = getProductById($id);
 
-// Load product image from external URL if requested
-if (isset($_GET['load_image']) && $_GET['load_image']) {
+// SSRF Vuln #1: Load image from URL (simple, like TaintInfer sample)
+if (isset($_GET['load_image'])) {
     $image_url = $_GET['load_image'];
-    $image_content = @file_get_contents($image_url);
-    if ($image_content) {
-        header('Content-Type: image/jpeg');
-        echo $image_content;
-        exit;
-    }
+    $image_content = file_get_contents($image_url);
+    header('Content-Type: image/jpeg');
+    echo $image_content;
+    exit;
 }
 
-// Check product stock via external API
-if (isset($_GET['check_api']) && $_GET['check_api']) {
+// SSRF Vuln #2: Check API (simple curl)
+if (isset($_GET['check_api'])) {
     $api_url = $_GET['check_api'];
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $api_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
     curl_close($ch);
-    echo "<div style='background:#f0f0f0;padding:20px;margin:20px;border-radius:8px;'><h3>API Response:</h3><pre>" . htmlspecialchars($result) . "</pre></div>";
-}
-
-if (!$product) {
-    include 'header.php';
-    echo "<p class='alert alert-danger'>Sản phẩm không tồn tại.</p>";
-    include 'footer.php';
+    echo "<pre>" . htmlspecialchars($result) . "</pre>";
     exit;
 }
-include 'header.php';
+
+$id = $_GET['id'] ?? 0;
+$product = getProductById($id);
+
+if (!$product) {
+    include 'includes/header.php';
+    echo "<p class='alert alert-danger'>Sản phẩm không tồn tại.</p>";
+    include 'includes/footer.php';
+    exit;
+}
+
+include 'includes/header.php';
 ?>
 <div class="product-detail" style="display:flex; gap:32px; flex-wrap:wrap; justify-content:center;">
     <div style="flex:1; min-width:260px; max-width:400px;">

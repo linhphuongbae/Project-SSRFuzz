@@ -1,45 +1,28 @@
 <?php
 require_once 'includes/common.php';
 
-// Validate product image URL
-if (isset($_POST['validate_image']) && $_POST['validate_image']) {
+// Validate product image URL - SSRF Vuln #11
+if (isset($_POST['validate_image'])) {
     $image_url = $_POST['validate_image'];
     if (strpos($image_url, '.xml') !== false) {
-        $xml = @simplexml_load_file($image_url);
-        if ($xml) {
-            echo "<div style='background:#d4edda;padding:20px;margin:20px;border-radius:8px;'>";
-            echo "<strong>Product data loaded from XML:</strong><br>";
-            echo "<pre>" . htmlspecialchars($xml->asXML()) . "</pre>";
-            echo "</div>";
-        }
+        $xml = simplexml_load_file($image_url);
+        echo $xml->asXML();
     } else {
-        $image_data = @file_get_contents($image_url);
-        if ($image_data) {
-            $img = @imagecreatefromstring($image_data);
-            if ($img) {
-                echo "<div style='background:#d4edda;padding:20px;margin:20px;border-radius:8px;'>";
-                echo "<strong>[SUCCESS] Image validated successfully!</strong><br>";
-                echo "Dimensions: " . imagesx($img) . "x" . imagesy($img);
-                imagedestroy($img);
-                echo "</div>";
-            }
-        }
+        $image_data = file_get_contents($image_url);
+        $img = imagecreatefromstring($image_data);
+        echo "Image: " . imagesx($img) . "x" . imagesy($img);
+        imagedestroy($img);
     }
+    exit;
 }
 
-// Bulk import products from external source
-if (isset($_POST['import_url']) && $_POST['import_url']) {
+// Bulk import products from external source - SSRF Vuln #12
+if (isset($_POST['import_url'])) {
     $import_url = $_POST['import_url'];
-    $data = @file_get_contents($import_url);
-    if ($data) {
-        $imported = json_decode($data, true);
-        if ($imported) {
-            echo "<div style='background:#cfe2ff;padding:20px;margin:20px;border-radius:8px;'>";
-            echo "<strong>[IMPORT] Successfully imported " . count($imported) . " products:</strong><br>";
-            echo "<pre>" . htmlspecialchars(print_r($imported, true)) . "</pre>";
-            echo "</div>";
-        }
-    }
+    $data = file_get_contents($import_url);
+    $imported = json_decode($data, true);
+    echo "<pre>" . print_r($imported, true) . "</pre>";
+    exit;
 }
 
 // Optional: Check if user is admin (commented out - everyone can access)
