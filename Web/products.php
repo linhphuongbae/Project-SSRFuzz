@@ -1180,7 +1180,7 @@ document.querySelectorAll('.thumbnail').forEach(thumb => {
             <?php foreach ($currentPageProducts as $product): ?>
             <div class="product-card">
                 <div class="product-image-container">
-                    <a href="products.php?id=<?php echo $product['id']; ?>" style="text-decoration: none; color: inherit;">
+                    <a href="product.php?id=<?php echo $product['id']; ?>" style="text-decoration: none; color: inherit;">
                         <div class="product-labels">
                             <span class="label-tag">NEW</span>
                             <span class="label-tag label-discount">-23%</span>
@@ -1193,7 +1193,7 @@ document.querySelectorAll('.thumbnail').forEach(thumb => {
                     </a>
                 </div>
                 <div class="product-card-body">
-                    <a href="products.php?id=<?php echo $product['id']; ?>" style="text-decoration: none; color: inherit;">
+                    <a href="product.php?id=<?php echo $product['id']; ?>" style="text-decoration: none; color: inherit;">
                         <div class="product-category-tag">
                             <?php 
                             $categoryNames = [
