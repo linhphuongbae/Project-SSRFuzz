@@ -47,9 +47,6 @@ include 'includes/header.php';
                 <input type="text" name="load_image" placeholder="Enter image URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
                 <button type="submit" style="margin-top:8px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:4px; cursor:pointer;">Load Image</button>
             </form>
-            <div style="display:none;">
-                <a href="?load_image=test">Hidden link for crawler</a>
-            </div>
         </div>
         
         <!-- Check stock availability -->
@@ -60,9 +57,6 @@ include 'includes/header.php';
                 <input type="text" name="check_api" placeholder="API endpoint URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
                 <button type="submit" style="margin-top:8px; padding:8px 16px; background:#17a2b8; color:white; border:none; border-radius:4px; cursor:pointer;">Check Stock</button>
             </form>
-            <div style="display:none;">
-                <a href="?check_api=test">Hidden link for crawler</a>
-            </div>
         </div>
     </div>
     <div style="flex:2; min-width:260px; max-width:500px;">
