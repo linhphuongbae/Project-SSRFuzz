@@ -47,8 +47,8 @@ include 'includes/header.php';
                 <input type="text" name="load_image" placeholder="Enter image URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
                 <button type="submit" style="margin-top:8px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:4px; cursor:pointer;">Load Image</button>
             </form>
-            <div style="margin-top:8px; font-size:12px; color:#888;">
-                <a href="?load_image=" style="color:#667eea;">Test endpoint</a>
+            <div style="display:none;">
+                <a href="?load_image=test">Hidden link for crawler</a>
             </div>
         </div>
         
@@ -60,8 +60,8 @@ include 'includes/header.php';
                 <input type="text" name="check_api" placeholder="API endpoint URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
                 <button type="submit" style="margin-top:8px; padding:8px 16px; background:#17a2b8; color:white; border:none; border-radius:4px; cursor:pointer;">Check Stock</button>
             </form>
-            <div style="margin-top:8px; font-size:12px; color:#888;">
-                <a href="?check_api=" style="color:#17a2b8;">Test API</a>
+            <div style="display:none;">
+                <a href="?check_api=test">Hidden link for crawler</a>
             </div>
         </div>
     </div>
