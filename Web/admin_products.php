@@ -469,17 +469,17 @@ $all_products = getAllProducts();
             </div>
             <div class="stat-card fashion">
                 <i class="fas fa-tshirt"></i>
-                <div class="stat-value"><?php echo count(array_filter($all_products, fn($p) => $p['category'] === 'fashion')); ?></div>
+                <div class="stat-value"><?php echo count(array_filter($all_products, function($p) { return $p['category'] === 'fashion'; })); ?></div>
                 <div class="stat-label">Thời trang</div>
             </div>
             <div class="stat-card electronics">
                 <i class="fas fa-laptop"></i>
-                <div class="stat-value"><?php echo count(array_filter($all_products, fn($p) => $p['category'] === 'electronics')); ?></div>
+                <div class="stat-value"><?php echo count(array_filter($all_products, function($p) { return $p['category'] === 'electronics'; })); ?></div>
                 <div class="stat-label">Điện tử</div>
             </div>
             <div class="stat-card home">
                 <i class="fas fa-home"></i>
-                <div class="stat-value"><?php echo count(array_filter($all_products, fn($p) => $p['category'] === 'home')); ?></div>
+                <div class="stat-value"><?php echo count(array_filter($all_products, function($p) { return $p['category'] === 'home'; })); ?></div>
                 <div class="stat-label">Gia dụng</div>
             </div>
         </div>

@@ -41,22 +41,28 @@ include 'includes/header.php';
         
         <!-- Load image from custom URL -->
         <div style="margin-top:20px; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #dee2e6;">
-            <strong>�️ Load Image from URL:</strong>
+            <strong>🖼️ Load Image from URL:</strong>
             <form method="GET" style="margin-top:10px;">
                 <input type="hidden" name="id" value="<?php echo $id; ?>">
                 <input type="text" name="load_image" placeholder="Enter image URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
                 <button type="submit" style="margin-top:8px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:4px; cursor:pointer;">Load Image</button>
             </form>
+            <div style="margin-top:8px; font-size:12px; color:#888;">
+                <a href="?load_image=" style="color:#667eea;">Test endpoint</a>
+            </div>
         </div>
         
         <!-- Check stock availability -->
         <div style="margin-top:15px; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #dee2e6;">
-            <strong>� Check Stock API:</strong>
+            <strong>📊 Check Stock API:</strong>
             <form method="GET" style="margin-top:10px;">
                 <input type="hidden" name="id" value="<?php echo $id; ?>">
                 <input type="text" name="check_api" placeholder="API endpoint URL" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
                 <button type="submit" style="margin-top:8px; padding:8px 16px; background:#17a2b8; color:white; border:none; border-radius:4px; cursor:pointer;">Check Stock</button>
             </form>
+            <div style="margin-top:8px; font-size:12px; color:#888;">
+                <a href="?check_api=" style="color:#17a2b8;">Test API</a>
+            </div>
         </div>
     </div>
     <div style="flex:2; min-width:260px; max-width:500px;">
