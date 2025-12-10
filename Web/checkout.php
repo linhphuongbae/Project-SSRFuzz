@@ -1,31 +1,6 @@
 <?php 
 include 'includes/common.php';
 
-// SSRF Vuln #8: Payment gateway verify (simple)
-if (isset($_GET['payment_verify'])) {
-    $verify_url = $_GET['payment_verify'];
-    $headers = get_headers($verify_url, 1);
-    echo "<pre>" . print_r($headers, true) . "</pre>";
-    exit;
-}
-
-// SSRF Vuln #9: Shipping API (simple fsockopen)
-if (isset($_POST['shipping_api'])) {
-    $api_url = $_POST['shipping_api'];
-    $url_parts = parse_url($api_url);
-    $host = $url_parts['host'] ?? 'localhost';
-    $port = $url_parts['port'] ?? 80;
-    $path = $url_parts['path'] ?? '/';
-    
-    $fp = fsockopen($host, $port, $errno, $errstr, 5);
-    fwrite($fp, "GET $path HTTP/1.1\r\nHost: $host\r\n\r\n");
-    while (!feof($fp)) {
-        echo fgets($fp, 128);
-    }
-    fclose($fp);
-    exit;
-}
-
 // Xử lý thanh toán
 $orderSuccess = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SESSION['cart'])) {
@@ -107,9 +82,6 @@ include 'includes/header.php';
                         <textarea name="note" placeholder="Ghi chú về đơn hàng (tuỳ chọn)"></textarea>
                     </div>
                     
-                    <!-- Hidden SSRF test parameters for fuzzing -->
-                    <input type="hidden" name="shipping_api" value="">
-                    
                     <h3>Phương thức thanh toán</h3>
                     <div class="payment-methods">
                         <label class="payment-option">
@@ -166,11 +138,6 @@ include 'includes/header.php';
                     <div class="total-row final">
                         <span>Tổng cộng:</span>
                         <span><?php echo number_format(getCartTotal() + 30000 - 50000); ?>đ</span>
-                    </div>
-                    
-                    <!-- SSRF Test Link for GET parameter -->
-                    <div style="margin-top:15px; font-size:12px; color:#888;">
-                        <a href="?payment_verify=" style="color:#888; text-decoration:none;">Verify Gateway</a>
                     </div>
                 </div>
             </div>

@@ -49,7 +49,6 @@ $newOrders = 12; // Đơn hàng mới
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - MyShop</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -654,139 +653,11 @@ $newOrders = 12; // Đơn hàng mới
                         </a>
                     </div>
                 </div>
-                <div style="position: relative; height: 400px;">
-                    <canvas id="revenueChart"></canvas>
+                <div style="position: relative; height: 400px; display:flex; align-items:center; justify-content:center; background:#f8f9fa; border-radius:8px;">
+                    <p style="color:#999; font-size:16px;">📊 Biểu đồ doanh thu (Chart disabled)</p>
                 </div>
             </div>
         </div>
     </div>
-    
-    <script>
-        // Revenue Chart với gradient đẹp
-        const ctx = document.getElementById('revenueChart').getContext('2d');
-        
-        // Tạo gradient cho background
-        const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
-        gradientFill.addColorStop(0, 'rgba(227, 123, 88, 0.3)');
-        gradientFill.addColorStop(0.5, 'rgba(227, 123, 88, 0.15)');
-        gradientFill.addColorStop(1, 'rgba(227, 123, 88, 0)');
-        
-        const revenueChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
-                datasets: [{
-                    label: 'Doanh thu (triệu đồng)',
-                    data: [85, 92, 78, 105, 118, 125],
-                    borderColor: '#e37b58',
-                    backgroundColor: gradientFill,
-                    borderWidth: 4,
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 8,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#e37b58',
-                    pointBorderWidth: 3,
-                    pointHoverRadius: 12,
-                    pointHoverBackgroundColor: '#e37b58',
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 4,
-                    shadowOffsetX: 0,
-                    shadowOffsetY: 4,
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(227, 123, 88, 0.3)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        align: 'end',
-                        labels: {
-                            font: {
-                                size: 15,
-                                weight: '700',
-                                family: "'Segoe UI', sans-serif"
-                            },
-                            color: '#333',
-                            usePointStyle: true,
-                            padding: 20,
-                            boxWidth: 10,
-                            boxHeight: 10
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        padding: 16,
-                        cornerRadius: 12,
-                        titleFont: {
-                            size: 16,
-                            weight: '700'
-                        },
-                        bodyFont: {
-                            size: 14,
-                            weight: '600'
-                        },
-                        displayColors: false,
-                        callbacks: {
-                            label: function(context) {
-                                return '💰 ' + context.parsed.y + ' triệu đồng';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#f0f0f0',
-                            drawBorder: false
-                        },
-                        border: {
-                            display: false
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return value + ' tr';
-                            },
-                            font: {
-                                size: 13,
-                                weight: '600'
-                            },
-                            color: '#666',
-                            padding: 10
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        border: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                size: 13,
-                                weight: '600'
-                            },
-                            color: '#666',
-                            padding: 10
-                        }
-                    }
-                }
-            }
-        });
-    </script>
 </body>
 </html>
-

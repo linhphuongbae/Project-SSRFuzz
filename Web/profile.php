@@ -1,22 +1,26 @@
 <?php
 include 'includes/common.php';
 
-// SSRF Vuln #3: Upload avatar from URL (simple like sample)
-if (isset($_POST['avatar_url'])) {
-    $url = $_POST['avatar_url'];
-    $info = getimagesize($url);
-    $image_data = file_get_contents($url);
-    echo "<pre>Avatar loaded: " . strlen($image_data) . " bytes</pre>";
-    exit;
-}
+$message = '';
 
-// SSRF Vuln #4: Import JSON from URL (simple)
-if (isset($_POST['import_json'])) {
-    $json_url = $_POST['import_json'];
-    $json_data = file_get_contents($json_url);
-    $profile_data = json_decode($json_data, true);
-    echo "<pre>" . print_r($profile_data, true) . "</pre>";
-    exit;
+// SSRF Vuln #1: Upload avatar from URL - GET
+if (isset($_GET['avatar_url'])) {
+    $url = $_GET['avatar_url'];
+    if (empty($url)) {
+        $message = '<div class="alert alert-error">URL avatar không được để trống</div>';
+    } else {
+        $info = @getimagesize($url);
+        if ($info === false) {
+            $message = '<div class="alert alert-error">Không thể load avatar từ: ' . htmlspecialchars($url) . '</div>';
+        } else {
+            $image_data = @file_get_contents($url);
+            if ($image_data === false) {
+                $message = '<div class="alert alert-error">Không thể tải avatar</div>';
+            } else {
+                $message = '<div class="alert alert-success">Upload avatar thành công: ' . strlen($image_data) . ' bytes</div>';
+            }
+        }
+    }
 }
 
 include 'includes/header.php';
@@ -78,6 +82,8 @@ include 'includes/header.php';
         </div>
         
         <div class="profile-main">
+            <?php echo $message; ?>
+            
             <div class="profile-header">
                 <h1>Thông tin cá nhân</h1>
                 <button class="btn-edit"><i class="fas fa-edit"></i> Chỉnh sửa</button>
@@ -161,16 +167,16 @@ include 'includes/header.php';
                 </div>
                 
                 <div class="info-section">
-                    <h3>Cập nhật ảnh đại diện</h3>
-                    <form method="POST" style="margin-top:15px;">
+                    <h3>Công cụ quản lý</h3>
+                    <div style="margin-top:15px;">
                         <div class="form-group">
-                            <label>URL ảnh đại diện</label>
-                            <input type="text" name="avatar_url" placeholder="https://example.com/avatar.jpg" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
-                            <!-- Hidden SSRF test parameters for fuzzing -->
-                            <input type="hidden" name="import_json" value="">
-                            <button type="submit" class="main-btn">Cập nhật ảnh</button>
+                            <label>Upload Avatar từ URL</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="avatar_url_input" placeholder="https://example.com/avatar.jpg" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                <a href="#" onclick="window.location.href='?avatar_url=' + document.getElementById('avatar_url_input').value; return false;" class="main-btn" style="white-space:nowrap;">📷 Upload</a>
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 
                 <div class="info-section">
