@@ -1,40 +1,11 @@
 <?php
 require_once 'includes/common.php';
 
+
 $message = '';
 $edit_product = null;
 
-// Validate Image URL - SSRF Vuln #11
-if (isset($_GET['validate_image'])) {
-    $image_url = $_GET['validate_image'];
-    if (empty($image_url)) {
-        $message = '<div class="alert alert-error">URL hình ảnh không được để trống</div>';
-    } else {
-        if (strpos($image_url, '.xml') !== false) {
-            $xml = @simplexml_load_file($image_url);
-            if ($xml === false) {
-                $message = '<div class="alert alert-error">Không thể load XML từ: ' . htmlspecialchars($image_url) . '</div>';
-            } else {
-                $message = '<div class="alert alert-success">Validate XML thành công!</div>';
-            }
-        } else {
-            $image_data = @file_get_contents($image_url);
-            if ($image_data === false) {
-                $message = '<div class="alert alert-error">Không thể load image từ: ' . htmlspecialchars($image_url) . '</div>';
-            } else {
-                $img = @imagecreatefromstring($image_data);
-                if ($img === false) {
-                    $message = '<div class="alert alert-error">Định dạng ảnh không hợp lệ</div>';
-                } else {
-                    $message = '<div class="alert alert-success">Validate image thành công: ' . imagesx($img) . 'x' . imagesy($img) . '</div>';
-                    imagedestroy($img);
-                }
-            }
-        }
-    }
-}
-
-// Sync product data from supplier - SSRF Vuln #12 (NEW)
+// Chỉ giữ lại SSRF demo ở sync_product
 if (isset($_GET['sync_product'])) {
     $supplier_url = $_GET['sync_product'];
     if (empty($supplier_url)) {
@@ -45,31 +16,6 @@ if (isset($_GET['sync_product'])) {
             $message = '<div class="alert alert-error">Không thể kết nối đến URL: ' . htmlspecialchars($supplier_url) . '</div>';
         } else {
             $message = '<div class="alert alert-success">Sync thành công từ: ' . htmlspecialchars($supplier_url) . '</div>';
-        }
-    }
-}
-
-// Check warehouse stock API - SSRF Vuln #13 (NEW)
-if (isset($_GET['check_warehouse'])) {
-    $warehouse_api = $_GET['check_warehouse'];
-    if (empty($warehouse_api)) {
-        $message = '<div class="alert alert-error">URL warehouse không được để trống</div>';
-    } else {
-        $ch = curl_init($warehouse_api);
-        if ($ch === false) {
-            $message = '<div class="alert alert-error">URL không hợp lệ: ' . htmlspecialchars($warehouse_api) . '</div>';
-        } else {
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-            $stock_info = curl_exec($ch);
-            if ($stock_info === false) {
-                $error = curl_error($ch);
-                curl_close($ch);
-                $message = '<div class="alert alert-error">Lỗi kết nối warehouse: ' . htmlspecialchars($error) . '</div>';
-            } else {
-                curl_close($ch);
-                $message = '<div class="alert alert-success">Kiểm tra kho thành công từ: ' . htmlspecialchars($warehouse_api) . '</div>';
-            }
         }
     }
 }
@@ -596,32 +542,13 @@ $all_products = getAllProducts();
                     <!-- Advanced Import Tools -->
                     <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin:15px 0; border:1px solid #dee2e6;">
                         <strong>Công cụ nâng cao:</strong>
-                        
                         <div class="form-group" style="margin-top:10px;">
-                            <label>Validate Image URL</label>
-                            <div style="display:flex; gap:8px;">
-                                <input type="text" id="validate_url" placeholder="https://cdn.example.com/product.jpg" style="flex:1;">
-                                <a href="#" onclick="window.location.href='?validate_image=' + document.getElementById('validate_url').value; return false;" class="btn btn-secondary" style="white-space:nowrap;">✓ Validate</a>
-                            </div>
-                            <small style="display:block; color:#6c757d; margin-top:5px;">Kiểm tra URL hình ảnh hợp lệ (hỗ trợ .jpg, .png, .xml)</small>
-                        </div>
-                        
-                        <div class="form-group">
                             <label>Sync từ Nhà Cung Cấp (GET)</label>
                             <div style="display:flex; gap:8px;">
                                 <input type="text" id="sync_url" placeholder="https://shopee.vn/api/product/123" style="flex:1;">
                                 <a href="#" onclick="window.location.href='?sync_product=' + document.getElementById('sync_url').value; return false;" class="btn btn-secondary" style="white-space:nowrap;">🔄 Sync</a>
                             </div>
                             <small style="display:block; color:#6c757d; margin-top:5px;">Đồng bộ dữ liệu từ Shopee/Lazada/1688</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Kiểm Tra Kho Hàng (GET)</label>
-                            <div style="display:flex; gap:8px;">
-                                <input type="text" id="warehouse_url" placeholder="https://api.warehouse.com/stock/123" style="flex:1;">
-                                <a href="#" onclick="window.location.href='?check_warehouse=' + document.getElementById('warehouse_url').value; return false;" class="btn btn-secondary" style="white-space:nowrap;">📦 Check</a>
-                            </div>
-                            <small style="display:block; color:#6c757d; margin-top:5px;">Kiểm tra tồn kho qua API warehouse</small>
                         </div>
                     </div>
                     
